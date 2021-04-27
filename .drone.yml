@@ -1,0 +1,77 @@
+---
+scireum_volumes: &scireum_volumes
+  - name: docker_socket
+    path: /var/run/docker.sock
+  - name: cargo
+    path: /var/.cargo
+
+kind: pipeline
+name: default
+
+platform:
+  os: linux
+  arch: amd64
+
+clone:
+  depth: 1
+
+steps:
+  - name: compile
+    image: rust:1.50
+    volumes: *scireum_volumes
+    commands:
+      - export CARGO_HOME="/var/.cargo"
+      - echo $CARGO_HOME
+      - cargo build
+    when:
+      event:
+        - push
+
+  - name: test
+    image: rust:1.50
+    volumes: *scireum_volumes
+    commands:
+      - export CARGO_HOME="/var/.cargo"
+      - echo $CARGO_HOME
+      - export RUSTFLAGS="-Dwarnings"
+      - rustup component add rustfmt
+      - rustup component add clippy
+      - cargo fmt -- --check
+      - cargo clippy -- -D warnings
+      - cargo test
+    when:
+      event:
+        - pull_request
+
+  - name: package
+    image: rust:1.50
+    volumes: *scireum_volumes
+    commands:
+      - export CARGO_HOME="/var/.cargo"
+      - echo $CARGO_HOME
+      - export RUSTFLAGS="-Dwarnings"
+      - rustup component add rustfmt
+      - rustup component add clippy
+      - "sed -i 's/0.0.1/${DRONE_TAG}/g' Cargo.toml"
+      - "sed -i 's/DEVELOPMENT-SNAPSHOT/${DRONE_TAG}/g' src/lib.rs"
+      - "sed -i 's/NO-REVISION/${DRONE_COMMIT_SHA}/g' src/lib.rs"
+      - cargo fmt -- --check
+      - cargo clippy -- -D warnings
+      - cargo test
+      - cargo login $CARGO_LOGIN
+      - cargo publish --allow-dirty
+      - cargo build --release
+    environment:
+      CARGO_LOGIN:
+        from_secret: cargo_login
+    when:
+      event:
+        - tag
+
+volumes:
+  - name: docker_socket
+    host:
+      path: /var/run/docker.sock
+  - name: cargo
+    host:
+      path: /var/.cargo
