@@ -10,9 +10,9 @@ tooling to setup logging, format messages and to react on signals. This is commo
 to properly run inside a Docker container.
 
 ## Links
-* Documentation: [apollo-framework](https://docs.rs/apollo-framework)
+* Documentation: [docs.rs](https://docs.rs/apollo-framework)
 * Repository: [GitHub](https://github.com/scireum/apollo-framework)
-* Crate: [jupiter-rs](https://crates.io/crates/apollo-framework)
+* Crate: [crates.io](https://crates.io/crates/apollo-framework)
 
 ## Contributions
 
