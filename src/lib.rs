@@ -7,12 +7,12 @@
 //! tooling to setup logging, format messages and to react on signals. This is commonly required
 //! to properly run inside a Docker container.
 #![deny(
-missing_docs,
-trivial_casts,
-trivial_numeric_casts,
-unused_extern_crates,
-unused_import_braces,
-unused_results
+    missing_docs,
+    trivial_casts,
+    trivial_numeric_casts,
+    unused_extern_crates,
+    unused_import_braces,
+    unused_results
 )]
 
 use simplelog::{ConfigBuilder, LevelFilter, SimpleLogger};
