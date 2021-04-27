@@ -60,7 +60,6 @@ steps:
       - cargo test
       - cargo login $CARGO_LOGIN
       - cargo publish --allow-dirty
-      - cargo build --release
     environment:
       CARGO_LOGIN:
         from_secret: cargo_login
