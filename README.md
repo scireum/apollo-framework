@@ -10,7 +10,7 @@ tooling to setup logging, format messages and to react on signals. This is commo
 to properly run inside a Docker container.
 
 Most notably a **Config** and a **Server** component is provided, both fully **aync** as they
-built up on[Tokio](https://tokio.rs).
+built up on [Tokio](https://tokio.rs).
 
 The **Config** monitors a local config file and broadcasts a change event throughout the whole
 platform once a new configuration is available.
