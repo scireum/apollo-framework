@@ -1,13 +1,26 @@
 # Apollo Framework
 
-The Apollo framework is a toolkit for building stable and robust server software.
+The Apollo framework is essentailly a runtime and a toolkit for building stable and robust server software.
 
  **Apollo** was extracted out of [Jupiter](https://github.com/scireum/jupiter) to make its
-core parse usable by other libraries or applications.
+core parts usable by other libraries or applications.
 
-Apollo provides a small **dependency injection helper** called *Platform** along with some
+Apollo provides a small **dependency injection helper** called **Platform** along with some
 tooling to setup logging, format messages and to react on signals. This is commonly required
 to properly run inside a Docker container.
+
+Most notably a **Config** and a **Server** component is provided, both fully **aync** as they
+built up on[Tokio](https://tokio.rs).
+
+The **Config** monitors a local config file and broadcasts a change event throughout the whole
+platform once a new configuration is available.
+
+The **Server** opens a port and spins of a loop which accepts and handles connections. The
+protocol implementation to be applied to each connection can be passed in using a closure
+or function reference.
+
+Note that the server also monitors the config and will re-allocate a new port if the underlying
+config changes. This permits for zero downtime migrations during releases.
 
 ## Links
 * Documentation: [docs.rs](https://docs.rs/apollo-framework)
