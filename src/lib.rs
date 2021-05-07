@@ -19,8 +19,10 @@ use simplelog::{ConfigBuilder, LevelFilter, SimpleLogger};
 use std::sync::Once;
 
 pub mod average;
+pub mod config;
 pub mod fmt;
 pub mod platform;
+pub mod server;
 pub mod signals;
 
 /// Contains the version of the Apollo framework.
@@ -52,4 +54,30 @@ pub fn init_logging() {
             panic!("Failed to initialize logging system: {}", error);
         }
     });
+}
+
+#[cfg(test)]
+mod testing {
+    use std::sync::Mutex;
+
+    lazy_static::lazy_static! {
+        /// Provides a global lock which has to be acquired if a test operates on shared
+        /// resources. This would either be our test port (1503) on which we start our
+        /// local server for integrations tests or the repository which operates on the
+        /// file system. Using this lock, we can still execute all other tests in parallel
+        /// and only block if required.
+        pub static ref SHARED_TEST_RESOURCES: Mutex<()> = Mutex::new(());
+    }
+
+    /// Executes async code within a single threaded tokio runtime.
+    pub fn test_async<F: std::future::Future>(future: F) {
+        use tokio::runtime;
+
+        let rt = runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
+
+        let _ = rt.block_on(future);
+    }
 }
