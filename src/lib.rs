@@ -7,6 +7,7 @@
 //! tooling to setup logging, format messages and to react on signals. This is commonly required
 //! to properly run inside a Docker container.
 #![deny(
+    warnings,
     missing_docs,
     trivial_casts,
     trivial_numeric_casts,
