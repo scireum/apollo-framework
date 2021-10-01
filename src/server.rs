@@ -219,9 +219,13 @@ impl<P: 'static + Default + Send + Sync + Clone> Server<P> {
     /// exit, or the config has changed and we should try to bind the server to the new address.
     pub async fn event_loop<F>(
         &self,
-        client_loop: &'static (impl Fn(Arc<Platform>, Arc<Connection<P>>, TcpStream) -> F + Send + Sync),
+        client_loop: impl Fn(Arc<Platform>, Arc<Connection<P>>, TcpStream) -> F
+            + Send
+            + Sync
+            + Copy
+            + 'static,
     ) where
-        F: Future<Output = anyhow::Result<()>> + Send + Sync,
+        F: Future<Output = anyhow::Result<()>> + Send,
     {
         let mut address = String::new();
         let mut last_bind_error_reported = Instant::now();
@@ -267,12 +271,12 @@ impl<P: 'static + Default + Send + Sync + Clone> Server<P> {
         &self,
         listener: &mut TcpListener,
         client_loop: impl Fn(Arc<Platform>, Arc<Connection<P>>, TcpStream) -> F
+            + Copy
             + Send
             + Sync
-            + Copy
             + 'static,
     ) where
-        F: Future<Output = anyhow::Result<()>> + Send + Sync,
+        F: Future<Output = anyhow::Result<()>> + Send,
     {
         let mut config_changed_flag = self.platform.require::<Config>().notifier();
 
@@ -288,7 +292,7 @@ impl<P: 'static + Default + Send + Sync + Clone> Server<P> {
                         // If a stream is present, we treat this as new connection and eventually
                         // start a client_loop for it...
                         if let Ok((stream, _)) = stream {
-                            self.handle_new_connection(stream,client_loop);
+                            self.handle_new_connection(stream, client_loop);
                         } else {
                             // Otherwise the socket has been closed therefore we exit to the
                             // event_loop which will either complete exit or try to re-create
@@ -323,15 +327,16 @@ impl<P: 'static + Default + Send + Sync + Clone> Server<P> {
     fn handle_new_connection<F>(
         &self,
         stream: TcpStream,
-        client_loop: impl Fn(Arc<Platform>, Arc<Connection<P>>, TcpStream) -> F
+        client_loop: impl FnOnce(Arc<Platform>, Arc<Connection<P>>, TcpStream) -> F
+            + 'static
             + Send
             + Sync
-            + 'static
             + Copy,
     ) where
-        F: Future<Output = anyhow::Result<()>> + Send + Sync,
+        F: Future<Output = anyhow::Result<()>> + Send,
     {
         let platform = self.platform.clone();
+        let client_loop = client_loop.clone();
         let _ = tokio::spawn(async move {
             // Mark the connection as nodelay, as we already optimize all writes as far as possible.
             let _ = stream.set_nodelay(true);
