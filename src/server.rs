@@ -336,7 +336,6 @@ impl<P: 'static + Default + Send + Sync + Clone> Server<P> {
         F: Future<Output = anyhow::Result<()>> + Send,
     {
         let platform = self.platform.clone();
-        let client_loop = client_loop.clone();
         let _ = tokio::spawn(async move {
             // Mark the connection as nodelay, as we already optimize all writes as far as possible.
             let _ = stream.set_nodelay(true);
