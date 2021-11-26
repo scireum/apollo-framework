@@ -11,7 +11,8 @@ use crate::platform::Platform;
 pub fn install(platform: Arc<Platform>) {
     let _ = tokio::spawn(async move {
         let ctrl_c = tokio::signal::ctrl_c();
-        let mut sig_hup = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::hangup()).unwrap();
+        let mut sig_hup =
+            tokio::signal::unix::signal(tokio::signal::unix::SignalKind::hangup()).unwrap();
 
         tokio::select! {
             _ = ctrl_c => {
