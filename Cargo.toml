@@ -2,7 +2,7 @@
 name = "apollo-framework"
 version = "0.0.1"
 authors = ["scireum GmbH <info@scireum.de>"]
-edition = "2018"
+edition = "2021"
 license = "MIT"
 description = "The Apollo framework is a toolkit for building stable and robust server software."
 readme = "README.md"
