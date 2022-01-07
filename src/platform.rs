@@ -47,7 +47,7 @@
 //! // and the platform is no longer considered active...
 //! assert_eq!(platform.is_running(), false);
 //! ```
-use std::any::Any;
+use std::any::{Any, TypeId};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
@@ -98,7 +98,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 /// }
 /// ```
 pub struct Platform {
-    services: Mutex<HashMap<String, Arc<dyn Any + Send + Sync>>>,
+    services: Mutex<HashMap<TypeId, Arc<dyn Any + Send + Sync>>>,
     is_running: AtomicBool,
 }
 
@@ -129,8 +129,11 @@ impl Platform {
     where
         T: Any + Send + Sync,
     {
-        let name = std::any::type_name::<T>().to_owned();
-        let _ = self.services.lock().unwrap().insert(name, service);
+        let _ = self
+            .services
+            .lock()
+            .unwrap()
+            .insert(TypeId::of::<T>(), service);
     }
 
     /// Tries to resolve a previously registered service.
@@ -162,10 +165,9 @@ impl Platform {
     where
         T: Any + Send + Sync,
     {
-        let name = std::any::type_name::<T>();
         let services = self.services.lock().unwrap();
         services
-            .get(name)
+            .get(&TypeId::of::<T>())
             .and_then(|entry| entry.clone().downcast::<T>().ok())
     }
 
